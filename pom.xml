@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>org.example</groupId>
+    <artifactId>hadoop-aws-2.6.0-cdh5.13.0</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <description>
+        This module contains code to support integration with Amazon Web Services.
+        It also declares the dependencies needed to work with AWS services.
+    </description>
+    <packaging>jar</packaging>
+
+    <properties>
+        <file.encoding>UTF-8</file.encoding>
+        <downloadSources>true</downloadSources>
+        <hadoop.tmp.dir>${project.build.directory}/test</hadoop.tmp.dir>
+        <maven.compiler.target>1.7</maven.compiler.target>
+        <maven.compiler.source>1.7</maven.compiler.source>
+
+        <!-- are scale tests enabled ? -->
+        <fs.s3a.scale.test.enabled>unset</fs.s3a.scale.test.enabled>
+        <!-- Size in MB of huge files. -->
+        <fs.s3a.scale.test.huge.filesize>unset</fs.s3a.scale.test.huge.filesize>
+        <!-- Size in MB of the partion size in huge file uploads. -->
+        <fs.s3a.scale.test.huge.partitionsize>unset</fs.s3a.scale.test.huge.partitionsize>
+        <!-- Timeout in seconds for scale tests.-->
+        <fs.s3a.scale.test.timeout>3600</fs.s3a.scale.test.timeout>
+        <!-- are scale tests enabled ? -->
+        <fs.s3a.s3guard.test.enabled>false</fs.s3a.s3guard.test.enabled>
+        <fs.s3a.s3guard.test.authoritative>false</fs.s3a.s3guard.test.authoritative>
+        <fs.s3a.s3guard.test.implementation>local</fs.s3a.s3guard.test.implementation>
+
+    </properties>
+    <repositories><repository>
+        <id>clodera-repos</id>
+        <url>https://repository.cloudera.com/content/repositories/releases/</url>
+    </repository></repositories>
+
+    <profiles>
+
+
+        <!-- Turn on scale tests-->
+        <profile>
+            <id>scale</id>
+            <activation>
+                <property>
+                    <name>scale</name>
+                </property>
+            </activation>
+            <properties >
+                <fs.s3a.scale.test.enabled>true</fs.s3a.scale.test.enabled>
+            </properties>
+        </profile>
+
+        <!-- Turn on s3guard tests-->
+        <profile>
+            <id>s3guard</id>
+            <activation>
+                <property>
+                    <name>s3guard</name>
+                </property>
+            </activation>
+            <properties >
+                <fs.s3a.s3guard.test.enabled>true</fs.s3a.s3guard.test.enabled>
+            </properties>
+        </profile>
+
+        <!-- Switch to dynamo DB for s3guard. Has no effect unless s3guard is enabled -->
+        <profile>
+            <id>dynamo</id>
+            <activation>
+                <property>
+                    <name>dynamo</name>
+                </property>
+            </activation>
+            <properties >
+                <fs.s3a.s3guard.test.implementation>dynamo</fs.s3a.s3guard.test.implementation>
+            </properties>
+        </profile>
+
+        <!-- Switch to DynamoDBLocal for s3guard. Has no effect unless s3guard is enabled -->
+        <profile>
+            <id>dynamodblocal</id>
+            <activation>
+                <property>
+                    <name>dynamodblocal</name>
+                </property>
+            </activation>
+            <properties>
+                <fs.s3a.s3guard.test.implementation>dynamodblocal</fs.s3a.s3guard.test.implementation>
+            </properties>
+        </profile>
+
+        <!-- Switch s3guard from Authoritative=false to true
+         Has no effect unless s3guard is enabled -->
+        <profile>
+            <id>non-auth</id>
+            <activation>
+                <property>
+                    <name>auth</name>
+                </property>
+            </activation>
+            <properties >
+                <fs.s3a.s3guard.test.authoritative>true</fs.s3a.s3guard.test.authoritative>
+            </properties>
+        </profile>
+
+    </profiles>
+
+
+
+    <dependencies>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <scope>compile</scope>
+        <version>2.6.0-cdh5.13.0</version>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-common</artifactId>
+        <scope>test</scope>
+        <version>2.6.0-cdh5.13.0</version>
+        <type>test-jar</type>
+    </dependency>
+    <dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>aws-java-sdk-bundle</artifactId>
+        <version>1.11.134</version>
+        <scope>compile</scope>
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-core</artifactId>
+        <version>2.2.3</version>
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-databind</artifactId>
+        <version>2.2.3</version>
+    </dependency>
+    <dependency>
+        <groupId>com.fasterxml.jackson.core</groupId>
+        <artifactId>jackson-annotations</artifactId>
+        <version>2.2.3</version>
+    </dependency>
+    <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.9.4</version>
+    </dependency>
+    <!--<dependency>
+        <groupId>com.amazonaws</groupId>
+        <artifactId>DynamoDBLocal</artifactId>
+        <version>1.12.0</version>
+        <scope>test</scope>
+        <exclusions>
+            <exclusion>
+                <groupId>org.hamcrest</groupId>
+                <artifactId>hamcrest-core</artifactId>
+            </exclusion>
+            <exclusion>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-http</artifactId>
+            </exclusion>
+        </exclusions>
+    </dependency>-->
+    <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.11</version>
+        <scope>test</scope>
+    </dependency>
+
+    <dependency>
+        <groupId>joda-time</groupId>
+        <artifactId>joda-time</artifactId>
+        <version>2.8.1</version>
+    </dependency>
+
+
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-mapreduce-client-jobclient</artifactId>
+        <version>2.6.0-cdh5.13.0</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-yarn-server-tests</artifactId>
+        <scope>test</scope>
+        <version>2.6.0-cdh5.13.0</version>
+        <type>test-jar</type>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-mapreduce-examples</artifactId>
+        <version>2.6.0-cdh5.13.0</version>
+        <scope>test</scope>
+        <type>jar</type>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-distcp</artifactId>
+        <version>2.6.0-cdh5.13.0</version>
+        <scope>test</scope>
+    </dependency>
+    <dependency>
+        <groupId>org.apache.hadoop</groupId>
+        <artifactId>hadoop-distcp</artifactId>
+        <version>2.6.0-cdh5.13.0</version>
+        <scope>test</scope>
+        <type>test-jar</type>
+    </dependency>
+    </dependencies>
+
+</project>
